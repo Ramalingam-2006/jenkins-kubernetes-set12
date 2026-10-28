@@ -20,23 +20,30 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            steps {
-                bat 'docker build -t ramalingam2006/jenkins-kubernetes-set12:latest .'
-            }
-        }
+    steps {
+        bat '"C:\\Users\\akkin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" build -t ramalingam2006/jenkins-kubernetes-set12:latest .'
+    }
+}
 
-        stage('Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds-set12',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_TOKEN'
-                )]) {
-                    bat 'echo %DOCKER_TOKEN%| docker login -u "%DOCKER_USER%" --password-stdin'
-                    bat 'docker push ramalingam2006/jenkins-kubernetes-set12:latest'
-                }
-            }
+        
+stage('Push Docker Image') {
+    steps {
+        withCredentials([usernamePassword(
+            credentialsId: 'dockerhub-creds-set12',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_TOKEN'
+        )]) {
+            bat '''
+            @echo off
+            setlocal DisableDelayedExpansion
+            echo %DOCKER_TOKEN%| "C:\\Users\\akkin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" login -u "%DOCKER_USER%" --password-stdin
+            if errorlevel 1 exit /b 1
+            "C:\\Users\\akkin\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" push ramalingam2006/jenkins-kubernetes-set12:latest
+            '''
         }
+    }
+}
+
 
         stage('Deploy to Kubernetes') {
             steps {
